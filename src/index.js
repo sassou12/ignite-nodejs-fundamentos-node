@@ -1,18 +1,17 @@
 //dependencies
-const { request, response } = require('express');
 const {v4: uuid ,validate} = require('uuid');
 const cors = require('cors');
 const express = require('express');
 
-//construction server
+//initialize server
 const app = express();
 
 //Middlewares
 app.use(cors());
 app.use(express.json());
 
-//functions middlewares
-const validateId = (request, response, next) => {
+//middlewares functions
+const isValidId = (request, response, next) => {
     const { id } = request.params;
     if(id && validate(id)){
         next();
@@ -22,7 +21,7 @@ const validateId = (request, response, next) => {
 };
 
 const courses = [];
-const checkedExistsCourse = (request, response, next) => {
+const isExistsCourse = (request, response, next) => {
     const {id} = request.params;
 
     const index = courses.findIndex(c => c.id === id);
@@ -52,14 +51,14 @@ app.post('/courses', (request, response) => {
     return response.json(course);
 });
 
-//***Other middleware
-app.use(checkedExistsCourse);
+//***other ways to use middleware
+app.use(isExistsCourse);
 
-app.get('/courses/:id', validateId, (request, response) => {
+app.get('/courses/:id', isValidId, (request, response) => {
     return response.json(courses[request.index]);
 });
 
-app.put('/courses/:id', validateId, (request, response) => {
+app.put('/courses/:id', isValidId, (request, response) => {
     const { id } = request.params;
     const { name, author } = request.body;
     const index = request.index;
@@ -69,7 +68,7 @@ app.put('/courses/:id', validateId, (request, response) => {
     return response.json(courses[index]);
 });
 
-app.patch('/courses/:id', validateId, (request, response) => {
+app.patch('/courses/:id', isValidId, (request, response) => {
     const { name, author } = request.body;
     const index = request.index;
 
@@ -83,7 +82,7 @@ app.patch('/courses/:id', validateId, (request, response) => {
     return response.json(courses[index]);
 });
 
-app.delete('/courses/:id', validateId, (request, response) => {
+app.delete('/courses/:id', isValidId, (request, response) => {
     courses.splice(request.index, 1);
 
     return response.status(204).send();
